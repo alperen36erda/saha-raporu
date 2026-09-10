@@ -1,0 +1,17 @@
+{
+  "name": "Gence Saha Kontrol Raporu",
+  "short_name": "Saha Raporu",
+  "description": "Sahada fotoğraf çekip açıklamasını yazarak elektrik kontrol raporu üretir.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#E4E8ED",
+  "theme_color": "#12275C",
+  "lang": "tr",
+  "icons": [
+    { "src": "./icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "./icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "./icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
