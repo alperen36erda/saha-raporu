@@ -7,18 +7,23 @@ Yayın adresi: https://alperen36erda.github.io/saha-raporu/
 
 ## Dosyalar
 
-| Dosya | İçerik |
-|---|---|
-| `index.html` | Uygulamanın tamamı — arayüz, PDF motoru (jsPDF), Word motoru (docx.js), gömülü fontlar ve logolar |
-| `sw.js` | Service worker. Önbellekten açar, arka planda günceller, offline çalıştırır |
-| `manifest.json` | PWA tanımı — ana ekrana eklenince tam ekran açılır |
-| `icon-192.png`, `icon-512.png` | Uygulama ikonları |
+| Dosya | İçerik | Ne zaman yüklenir |
+|---|---|---|
+| `index.html` | Arayüz, veri katmanı, gömülü logolar (~71 KB) | açılışta |
+| `lib-jspdf.js` | PDF motoru (357 KB) | ilk PDF çıktısında |
+| `fonts.js` | PDF'in gömülü Liberation Serif/Sans altkümeleri (87 KB) | ilk PDF çıktısında |
+| `lib-docx.js` | Word motoru (386 KB) | ilk Word çıktısında |
+| `sw.js` | Service worker. Önbellekten açar, arka planda günceller, offline çalıştırır | — |
+| `manifest.json` | PWA tanımı — ana ekrana eklenince tam ekran açılır | — |
+| `icon-192.png`, `icon-512.png` | Uygulama ikonları | — |
 
+Ağır kütüphaneler açılışta ayrıştırılmıyor; ilk kullanımda yükleniyor. Service worker
+hepsini önden önbelleğe aldığı için bu yükleme çevrimdışıyken de yerelden karşılanır.
 Harici bağımlılık yok, CDN yok. İlk açılıştan sonra internet gerekmez.
 
 ## Özellikler
 
-- Kamera veya galeriden fotoğraf; uzun kenar 1500px'e indirilip JPEG olarak sıkıştırılır, EXIF dönüşü uygulanır
+- Kamera veya galeriden fotoğraf; uzun kenar 1280px'e indirilip JPEG olarak sıkıştırılır, EXIF dönüşü uygulanır
 - Madde başına istenen sayıda fotoğraf; açıklamasız fotoğraf ve fotoğrafsız madde de mümkün
 - Numaralandırma yalnızca açıklaması olan maddelere verilir, sıra değişince kendini günceller
 - Madde başına kalın + altı çizili vurgu

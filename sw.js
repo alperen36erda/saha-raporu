@@ -7,6 +7,9 @@ const CACHE = "gence-saha-raporu";
 const DOSYALAR = [
   "./",
   "./index.html",
+  "./lib-jspdf.js",   // PDF üretimi — ilk çıktıda yüklenir, burada önden önbelleğe alınır
+  "./lib-docx.js",    // Word üretimi
+  "./fonts.js",      // PDF'in gömülü Türkçe fontları
   "./manifest.json",
   "./icon-192.png",
   "./icon-512.png"
