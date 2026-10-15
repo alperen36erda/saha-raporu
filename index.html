@@ -155,6 +155,8 @@ details.card > .card-b{animation:girisAlt .26s var(--ease) both}
 .btn.primary{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:600}
 .btn.primary:hover{background:#35507A;border-color:#35507A}
 .btn.wide{flex:1.35}
+.btn.arti{display:flex;align-items:center;justify-content:center;gap:10px;padding:15px 10px}
+.btn.arti span{font-size:24px;font-weight:300;line-height:1;margin-top:-2px}
 .btn[disabled]{opacity:.4}
 @media (max-width:400px){.btn{padding:13px 4px;font-size:14px}}
 
@@ -285,10 +287,8 @@ details.card > .card-b{animation:girisAlt .26s var(--ease) both}
 </div>
 
 <div class="bottom hide" id="barDuzen">
-  <button class="btn primary wide" id="btnShot">Çek</button>
-  <button class="btn" id="btnLib">Galeri</button>
-  <button class="btn" id="btnItem">Madde</button>
-  <button class="btn" id="btnPdf">PDF</button>
+  <button class="btn primary arti" id="btnArti" aria-label="Ekle ve oluştur">
+    <span>+</span></button>
 </div>
 
 <input type="file" id="pickCam" accept="image/*" capture="environment" hidden>
@@ -984,8 +984,15 @@ function renderItems(){
     it.photos.forEach(p=>{
       const c=document.createElement("div"); c.className="shot";
       const im=document.createElement("img"); im.src=url(p); im.alt="";
+      im.onclick=()=>sheet(null,[
+        {ad:"Telefona kaydet", alt:"Paylaş menüsünden galeriye veya dosyalara",
+         yap:()=>fotoKaydet(p,fotoAdi(R,1+tumFotolar(R).findIndex(z=>z.p.id===p.id)))},
+        {ad:"Fotoğrafı sil", tehlike:true,
+         yap:()=>{ it.photos=it.photos.filter(y=>y.id!==p.id); save(); renderItems(); }}
+      ]);
       const x=document.createElement("button"); x.innerHTML="&#10005;";
-      x.onclick=()=>{ it.photos=it.photos.filter(y=>y.id!==p.id); save(); renderItems(); };
+      x.onclick=e=>{ e.stopPropagation();
+        it.photos=it.photos.filter(y=>y.id!==p.id); save(); renderItems(); };
       c.appendChild(im); c.appendChild(x); sh.appendChild(c);
     });
     const ac=document.createElement("button"); ac.className="addshot"; ac.innerHTML="<b>+</b>çek";
@@ -1082,11 +1089,22 @@ $("#fU2").oninput=e=>{AYAR.imza.u2=e.target.value;ayarKaydet();};
 
 $("#btnBack").onclick=goListe;
 $("#btnYeniRapor").onclick=()=>{ R=yeniRapor(); save(); goDuzen(); $("#fMagaza").focus(); };
-$("#btnShot").onclick=()=>{ pickTarget=null; $("#pickCam").click(); };
-$("#btnLib").onclick=()=>{ pickTarget=null; $("#pickLib").click(); };
-$("#btnPdf").onclick=()=>ciktiAl(R.id,"pdf",R);
+const fotoCek=()=>{ pickTarget=null; $("#pickCam").click(); };
+const galeriAc=()=>{ pickTarget=null; $("#pickLib").click(); };
 
-$("#btnItem").onclick=()=>{
+$("#btnArti").onclick=()=>{
+  sheet("Ne yapmak istiyorsun?",[
+    {ad:"Fotoğraf çek", alt:"Kamera açılır, çekilen foto yeni maddeye düşer", yap:fotoCek},
+    {ad:"Galeriden fotoğraf ekle", alt:"Birden fazla seçebilirsin", yap:galeriAc},
+    {ad:"Madde ekle", alt:"Boş madde veya hazır cümlelerden biri", yap:maddePaneli},
+    {baslik:"Raporu oluştur"},
+    {ad:"PDF oluştur", yap:()=>ciktiAl(R.id,"pdf",R)},
+    {ad:"Word oluştur", yap:()=>ciktiAl(R.id,"docx",R)},
+    {ad:"Fotoğrafları telefona kaydet", alt:"Rapordaki tüm fotoğraflar", yap:tumFotoKaydet}
+  ]);
+};
+
+const maddePaneli=()=>{
   const ops=[{ad:"Boş madde ekle",yap:()=>maddeEkle("")}];
   if(HAZIR.length) ops.push({baslik:"Hazır maddeler"});
   HAZIR.forEach(t=>ops.push({
@@ -1176,6 +1194,35 @@ async function paylasVeyaIndir(blob,ad,tip){
     catch(e){ if(e&&e.name==="AbortError") return "iptal"; }
   }
   indir(blob,ad); return "indirildi";
+}
+function fotoAdi(r,n){
+  const yer=(r.magaza||"foto").trim().replace(/[\\/:*?"<>|]/g,"-").slice(0,28) || "foto";
+  return yer+"-"+trTarih(r.tarih).replace(/\./g,"-")+"-"+String(n).padStart(2,"0")+".jpg";
+}
+function tumFotolar(r){
+  const liste=[]; let n=0;
+  r.items.forEach(it=>it.photos.forEach(p=>liste.push({p:p,ad:fotoAdi(r,++n)})));
+  return liste;
+}
+async function fotoKaydet(p,ad){
+  const file=new File([p.blob],ad,{type:"image/jpeg"});
+  if(navigator.canShare && navigator.canShare({files:[file]})){
+    try{ await navigator.share({files:[file],title:ad}); return "paylasildi"; }
+    catch(e){ if(e&&e.name==="AbortError") return "iptal"; }
+  }
+  indir(p.blob,ad); return "indirildi";
+}
+async function tumFotoKaydet(){
+  const liste=tumFotolar(R);
+  if(!liste.length){ toast("Raporda fotoğraf yok"); return; }
+  const files=liste.map(x=>new File([x.p.blob],x.ad,{type:"image/jpeg"}));
+  if(navigator.canShare && navigator.canShare({files:files})){
+    try{ await navigator.share({files:files,title:baslikOf(R)}); return; }
+    catch(e){ if(e&&e.name==="AbortError") return; }
+  }
+  const v=veil(liste.length+" fotoğraf indiriliyor");
+  for(const x of liste){ indir(x.p.blob,x.ad); await new Promise(r=>setTimeout(r,350)); }
+  v.remove(); toast("İndirilenler klasörüne kaydedildi",3500);
 }
 function dosyaAdi(r,uzanti){ return baslikOf(r).replace(/[\\/:*?"<>|]/g,"-")+"."+uzanti; }
 
