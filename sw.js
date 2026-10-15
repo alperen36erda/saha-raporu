@@ -41,8 +41,9 @@ self.addEventListener("fetch", e => {
     caches.open(CACHE).then(async cache => {
       const kayitli = await cache.match(r, { ignoreSearch: true });
 
+      const sorguVar = new URL(r.url).search !== "";   // ?x=1 gibi adresleri biriktirme
       const agdan = fetch(r).then(cevap => {
-        if (cevap && cevap.status === 200 && cevap.type === "basic") {
+        if (cevap && cevap.status === 200 && cevap.type === "basic" && !sorguVar) {
           cache.put(r, cevap.clone());
         }
         return cevap;
