@@ -135,6 +135,16 @@ label.f input:focus,label.f textarea:focus{outline:0;background:var(--surface);
 .addshot:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
 .addshot b{font-size:19px;font-weight:300;line-height:1}
 
+.ekleSatir{display:flex;gap:8px;margin-bottom:12px}
+.ekleAna{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;
+  background:var(--surface);border:1px dashed #CBD3DF;color:var(--accent);
+  border-radius:var(--r);padding:15px 10px;font-size:15px;font-weight:500}
+.ekleAna:hover{border-color:var(--accent);background:var(--accent-soft)}
+.ekleAna b{font-size:20px;font-weight:300;line-height:1}
+.ekleHazir{background:var(--surface);border:1px dashed #CBD3DF;color:var(--ink-2);
+  border-radius:var(--r);padding:15px 16px;font-size:14px;flex:none}
+.ekleHazir:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+
 details.card > summary{padding:14px;font-size:13.5px;color:var(--ink-2);cursor:pointer;
   list-style:none;display:flex;justify-content:space-between;align-items:center}
 details.card > summary::-webkit-details-marker{display:none}
@@ -952,6 +962,7 @@ function renderItems(){
   el.innerHTML="";
   if(!R.items.length){
     el.innerHTML='<div class="empty">Fotoğrafı çek, altına ne yapılacağını yaz. Maddeler sırayla buraya dizilir.</div>';
+    el.appendChild(maddeEkleSatiri());
     return;
   }
   R.items.forEach((it,i)=>{
@@ -1005,7 +1016,20 @@ function renderItems(){
     h.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>eylem(b.dataset.a,i));
     el.appendChild(d); buyut(ta);
   });
+  el.appendChild(maddeEkleSatiri());
   yeniMaddeId=null;
+}
+function maddeEkleSatiri(){
+  const d=document.createElement("div"); d.className="ekleSatir";
+  const b=document.createElement("button");
+  b.className="ekleAna"; b.innerHTML="<b>+</b> Madde ekle";
+  b.onclick=()=>maddeEkle("");
+  const h=document.createElement("button");
+  h.className="ekleHazir"; h.textContent="Hazır";
+  h.title="Hazır cümlelerden seç";
+  h.onclick=maddePaneli;
+  d.appendChild(b); d.appendChild(h);
+  return d;
 }
 function tazeleNumaralar(){
   const nums=numaralar(R);
@@ -1096,7 +1120,6 @@ $("#btnArti").onclick=()=>{
   sheet("Ne yapmak istiyorsun?",[
     {ad:"Fotoğraf çek", alt:"Kamera açılır, çekilen foto yeni maddeye düşer", yap:fotoCek},
     {ad:"Galeriden fotoğraf ekle", alt:"Birden fazla seçebilirsin", yap:galeriAc},
-    {ad:"Madde ekle", alt:"Boş madde veya hazır cümlelerden biri", yap:maddePaneli},
     {baslik:"Raporu oluştur"},
     {ad:"PDF oluştur", yap:()=>ciktiAl(R.id,"pdf",R)},
     {ad:"Word oluştur", yap:()=>ciktiAl(R.id,"docx",R)},
